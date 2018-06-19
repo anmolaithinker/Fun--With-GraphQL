@@ -3,7 +3,14 @@
 import graphene
 
 # Getting reference from the functions data
-from data import get_character , get_friends , get_human , get_droid
+from data import get_character , get_friends , get_human , get_droid , get_hero
+
+
+# Defining enum type ( 4 -> NewHope and 5 -> Empire and 6 -> Jedi)
+class Episode(graphene.Enum):
+	NEWHOPE = 4
+	EMPIRE = 5
+	JEDI = 6
 
 class Character(graphene.Interface):
 	# Id
@@ -16,7 +23,7 @@ class Character(graphene.Interface):
 	friends = graphene.List(lambda :Character)
 
 	# appears_in
-#	appears_in = graphene.List(Episode)
+	appears_in = graphene.List(Episode)
 
 	def resolve_friends(self , info):
 		return [get_character(f) for f in self.friends]
@@ -35,12 +42,17 @@ class Droid(graphene.ObjectType):
 # Query -> Object Type ( Very Important -> Combine Everything)	
 class Query(graphene.ObjectType):
 
+	# Hero Pointer
+	hero = graphene.Field(Character , episode  = Episode())
+
 	# Human pointer
 	human = graphene.Field(Human , id = graphene.String())
 
 	# droid pointer
 	droid = graphene.Field(Droid , id = graphene.String())
 
+	def resolve_hero(self,info,episode = None):
+		return get_hero(episode)
 
 	def resolve_human(self , info , id):
 		return get_human(id)
